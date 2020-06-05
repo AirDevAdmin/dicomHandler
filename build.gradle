@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+group 'syb'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+ext {
+    dcm4cheVersion = '3.3.5'
+}
+
+
+repositories {
+    mavenCentral()
+    maven { url "https://www.dcm4che.org/maven2/" }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile(
+
+            "org.dcm4che:dcm4che-core:${dcm4cheVersion}",
+            "org.dcm4che:dcm4che-net:${dcm4cheVersion}",
+            "org.dcm4che.tool:dcm4che-tool-dcm2jpg:${dcm4cheVersion}",
+            "org.dcm4che.tool:dcm4che-tool-storescu:${dcm4cheVersion}"
+
+    )
+}

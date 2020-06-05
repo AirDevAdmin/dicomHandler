@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="dicomHandler.main:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/dicomHandler_main_jar</output-path>
+    <root id="archive" name="dicomHandler.main.jar">
+      <element id="module-output" name="dicomHandler.main" />
+    </root>
+  </artifact>
+</component>
