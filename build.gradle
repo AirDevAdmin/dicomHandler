@@ -20,6 +20,12 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile 'commons-codec:commons-codec:1.14'
+    compile group: 'commons-net', name: 'commons-net', version: '3.6'
+    compile group: 'de.digitalcollections.imageio', name: 'imageio-openjpeg', version: '0.2.5'
+    compile group: 'com.sun.media', name: 'jai_imageio', version: '1.1'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.0.0'
+
     compile(
 
             "org.dcm4che:dcm4che-core:${dcm4cheVersion}",

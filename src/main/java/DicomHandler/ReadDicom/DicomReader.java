@@ -10,11 +10,11 @@ import org.dcm4che3.data.VR;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferUShort;
+import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -288,16 +288,22 @@ public class DicomReader {
 
 		checkHeaderStart();
 
+		boolean compressed = false;
+
 		while(!m_flagFileEnd)
 		{
 			int tag = getNextTag();
-
-			if(tag == Tag.PixelData)
+			System.out.println(String.format("TAG : %08x , Lengt : %d", tag,m_nElementLength));
+			if(tag == Tag.TransferSyntaxUID){
+				String syntax = getValue(m_VR);
+				if(syntax.trim().equals("1.2.840.10008.1.2.4.91"))
+					compressed = true;
+			}else if(tag == Tag.PixelData)
 			{
-				getNextTag();
-				getNextTag();
-
- 				return getPixelData(m_nElementLength);
+				if(compressed)
+					return getPixelDataJPEG2000(m_nElementLength);
+				else
+					return getPixelData(m_nElementLength);
 			}
 			else
 			{
@@ -677,14 +683,56 @@ public class DicomReader {
 	private byte[] getPixelData(int length) throws IOException
 	{
 
+
+
+
 		byte[] arrPixelData = new byte[m_nElementLength];
 
 		for(int i=0; i<m_nElementLength;i++)
 		{
 			arrPixelData[i] =  (byte) m_bisInputStream.read();
+
+
 		}
 
 		return arrPixelData;
+	}
+	private byte[] getPixelDataJPEG2000(int length) throws IOException
+	{
+		skip(m_nElementLength);
+		getNextTag();
+
+		skip(m_nElementLength);
+		getNextTag();
+
+
+
+		byte[] arrPixelData = new byte[m_nElementLength];
+		for(int i=0; i<m_nElementLength;i++)
+		{
+			arrPixelData[i] =  (byte) m_bisInputStream.read();
+		}
+
+		ByteArrayInputStream bis = new ByteArrayInputStream(arrPixelData);
+		BufferedImage jpgImage = ImageIO.read(bis);
+		int height = jpgImage.getHeight();
+		int width = jpgImage.getWidth();
+		byte[] output = new byte[height*width*2];
+		DataBufferUShort dataBuffer = (DataBufferUShort) jpgImage.getRaster().getDataBuffer();
+		short[] data =dataBuffer.getData();
+		for(int i=0; i<data.length;i++) {
+             byte ret1 =(byte) (data[i] & 0xff);
+			byte ret2 =(byte) ((data[i] >> 8) & 0xff);
+			output[i*2] = ret1;
+			output[i*2+1] = ret2;
+		}
+
+
+
+
+
+		return output;
+
 	}
 
 

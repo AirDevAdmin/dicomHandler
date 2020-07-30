@@ -150,12 +150,25 @@ Manufacturer( Tag.Manufacturer, VR.LO,  DcmTagCategory.EQUIPMENT, true, ""),
     private boolean mandatroy;
     private String defultVaule;
 
+
+
+
+
+
     DicomReconTag(int tag, VR vr, DcmTagCategory category, boolean mandatroy, String defultVaule){
         this.tag = tag;
         this.vr = vr;
         this.category = category;
         this.mandatroy = mandatroy;
         this.defultVaule = defultVaule;
+    }
+
+    public static void printAllTag( ) {
+
+        for (DicomReconTag tmp : DicomReconTag.class.getEnumConstants()) {
+            System.out.println(String.format("TAG : %08x , Description : %s, Category : %s",  tmp.getTag(),tmp.toString(),tmp.getCategory().name() ));
+              }
+
     }
 
     public static List<DicomReconTag> getTagList(int[] input) {

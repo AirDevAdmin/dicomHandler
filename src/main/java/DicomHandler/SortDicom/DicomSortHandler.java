@@ -3,14 +3,21 @@ package DicomHandler.SortDicom;
 import DicomHandler.CleanDicom.DicomCleanHandler;
 import DicomHandler.DicomHandler;
 import DicomHandler.ReadDicom.DicomReader;
+import DicomHandler.Util.AES256Util;
 import DicomHandler.Util.StringUtil;
 import org.dcm4che3.data.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -20,9 +27,9 @@ public class DicomSortHandler extends DicomHandler {
 
 
     public static void main(String[] args){
-       /* DicomSortHandler dicomSortSeriesHandler = new DicomSortHandler();
+        DicomSortHandler dicomSortSeriesHandler = new DicomSortHandler();
 
-        dicomSortSeriesHandler.setRootPath(new File("C:\\Users\\ShinYongbin\\Desktop\\MOCK_Training\\GX_I7"));
+        dicomSortSeriesHandler.setRootPath(new File("D:\\98_data\\03_AiCRO_Dev\\Compressed DICOM"));
         dicomSortSeriesHandler.readRootPath();
         try {
             dicomSortSeriesHandler.startRecleanDicom();
@@ -30,12 +37,7 @@ public class DicomSortHandler extends DicomHandler {
             e.printStackTrace();
         }
 
-        System.out.println("test");*/
-
-       String test = "1,2,3,4,5";
-       System.out.println(test.split(",",2)[1]);
-        System.out.println(test.split(",",3)[2]);
-
+        System.out.println("test");
     }
 
     static Logger logger =  LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -56,6 +58,9 @@ public class DicomSortHandler extends DicomHandler {
 
 
         public String getStudyUID() {
+            return this.studyUID;
+        }
+        public String getPatientID() {
             return this.studyUID;
         }
 
@@ -84,6 +89,18 @@ public class DicomSortHandler extends DicomHandler {
             String timepoint = split[split.length-2];
             return rootPath.getAbsolutePath()+File.separator+sortFileRootName+File.separator+
                     subject +File.separator+ timepoint  +File.separator+studyName+File.separator+seriesName;
+        }
+        public String getOutputSortPath(){
+            String pattern = Pattern.quote(System.getProperty("file.separator"));
+            String[] split = filePath.split(pattern);
+            String[] rootsplite = rootPath.getAbsolutePath().split(pattern);
+            StringBuilder outputPath = new StringBuilder();
+            for(int i=0; i<split.length-1;i++){
+                outputPath.append(split[i]+File.separator);
+                if(i==rootsplite.length-1)
+                    outputPath.append(sortFileRootName+File.separator);
+            }
+            return outputPath.toString();
         }
 
 
@@ -133,32 +150,57 @@ public class DicomSortHandler extends DicomHandler {
     public void startRecleanDicom() throws IOException {
         HashMap<String, HashMap<String,List<SliceInfo>>> fileList = getSortStudys();
         Set<String> studyKeyList =  fileList.keySet();
+        AES256Util aes256Util = new AES256Util();
+
         for(String studyKey : studyKeyList){
             HashMap<String,List<SliceInfo>> tmSeriesList = fileList.get(studyKey);
-            String studyUID =null;
+            String patientID =studyKey;
             String studyName =  StringUtil.getRandomString(5);
             Set<String> seriesKeyList =  tmSeriesList.keySet();
+
+            String patientName = null;
+            try {
+                String encodeString = aes256Util.aesEncode(patientID);
+                patientName = encodeString+"_"+aes256Util.aesEncode(encodeString);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (NoSuchPaddingException e) {
+                e.printStackTrace();
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            } catch (InvalidAlgorithmParameterException e) {
+                e.printStackTrace();
+            } catch (IllegalBlockSizeException e) {
+                e.printStackTrace();
+            } catch (BadPaddingException e) {
+                e.printStackTrace();
+            }
+
 
             for(String seriesKey : seriesKeyList){
                 List<SliceInfo> tmpSliceList = tmSeriesList.get(seriesKey);
                 DicomSortSeriesHandler dicomSortSeriesHandler = new DicomSortSeriesHandler();
                 dicomSortSeriesHandler.setSliceinfos(tmpSliceList);
-                String seriesName = StringUtil.getRandomString(5);
+                //String seriesName = StringUtil.getRandomString(5);
                 List<SliceInfo> sortList = dicomSortSeriesHandler.getSortFileList();
 
                 int idx = 0;
                 for(SliceInfo slice : sortList){
-                    if(studyUID==null)
-                        studyUID = slice.studyUID;
+                    if(patientID==null)
+                        patientID = slice.getPatientID();
                     DicomReader dicomReader = new DicomReader(new File(slice.filePath));
                     DicomCleanHandler dicomCleanHandler = new DicomCleanHandler();
 
+
                     dicomCleanHandler.setSortRule(dicomSortSeriesHandler.getSortState());
                     HashMap<Integer, String>  tmpDcmS=  dicomReader.getAttirbutesWithOutSQ();
-                    tmpDcmS.put(Tag.StudyInstanceUID,  studyUID);
+
+                    String seriesFolderName = tmpDcmS.get(Tag.SeriesNumber)+"_"+
+                            tmpDcmS.get(Tag.SeriesDescription)+"_"+tmpDcmS.get(Tag.ProtocolName);
+                    tmpDcmS.put(Tag.StudyInstanceUID,  slice.getStudyUID());
                     tmpDcmS.put(Tag.InstanceNumber,  Integer.toString(idx++));
                     dicomCleanHandler.buildAttrbutes(tmpDcmS,dicomReader.getPixelData());
-                    dicomCleanHandler.saveDicomFile(slice.getOutputOriPath(studyName,seriesName));
+                    dicomCleanHandler.saveDicomFile(slice.getOutputSortPath()+seriesFolderName+File.separator);
                 }
             }
         }
@@ -172,6 +214,7 @@ public class DicomSortHandler extends DicomHandler {
         HashMap<String, HashMap<String,List<SliceInfo>>> outputMap = new HashMap<>();
 
         for(SliceInfo tmp : this.sliceinfos){
+            String patientID = tmp.getPatientID();
             String studyUID = tmp.getStudyUID();
             String seiresUID = tmp.getSeriesUID();
             HashMap<String,List<SliceInfo>> tmpSeries= null;
@@ -189,7 +232,7 @@ public class DicomSortHandler extends DicomHandler {
             }
             sliceInfos.add(tmp);
             tmpSeries.put(seiresUID,sliceInfos);
-            outputMap.put(studyUID,tmpSeries);
+            outputMap.put(patientID,tmpSeries);
         }
        return outputMap;
     }

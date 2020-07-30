@@ -41,7 +41,7 @@ public class DicomCleanHandler extends DicomHandler {
         setAttributes( DicomReconTag.getMandatroyTagList()  , arrTagNVaule);
 
         ///Medai SOP Clss == SOP class
-        setAttribute(Tag.SOPClassUID, arrTagNVaule.get(Tag.MediaStorageSOPClassUID));
+       // setAttribute(Tag.SOPClassUID, arrTagNVaule.get(Tag.MediaStorageSOPClassUID));
 
 
         String Modal = attributes.getString(Tag.Modality);
