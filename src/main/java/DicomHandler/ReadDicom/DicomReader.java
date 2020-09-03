@@ -1,24 +1,20 @@
 package DicomHandler.ReadDicom;
 
-import DicomHandler.Config.CONFIG;
+
 
 import DicomHandler.Config.DicomStandard;
 import DicomHandler.Config.Dictionary;
-import javafx.scene.control.Skin;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferUShort;
 import java.io.*;
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 
 public class DicomReader {
@@ -210,7 +206,8 @@ public class DicomReader {
 	public HashMap<Integer, String> getAttirbutesWithOutSQ() throws IOException
 	{
 		m_bisInputStream.reset();
-		checkHeaderStart();
+		if(!checkHeaderStart())
+			return null;
         HashMap<Integer, String>  output = new HashMap<>();
 
 

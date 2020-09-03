@@ -2,6 +2,7 @@ package DicomHandler.Util;
 
 import DicomHandler.Config.Dictionary;
 import DicomHandler.ReadDicom.DicomReader;
+import org.dcm4che3.data.Tag;
 
 import javax.swing.*;
 import java.io.File;
@@ -20,6 +21,137 @@ public class DicomHeaderExtraction {
     private static List<HashMap<String, String>> columsValue = new ArrayList<>();
 
 
+    public static int[] AnmiTagList = {
+           Tag.AcquisitionComments                              ,
+           Tag.AcquisitionContextSequence                       ,
+           Tag.AcquisitionDate                                  ,
+           Tag.AcquisitionDateTime                              ,
+           Tag.AcquisitionDeviceProcessingDescription           ,
+           Tag.AcquisitionProtocolDescription                   ,
+           Tag.AcquisitionTime                                  ,
+           Tag.AccessionNumber                                  ,
+           Tag.AdmissionID                                      ,
+           Tag.AdmittingDate                                    ,
+           Tag.AdmittingDiagnosesCodeSequence                   ,
+           Tag.AdmittingDiagnosesDescription                    ,
+           Tag.AdmittingTime                                    ,
+           Tag.DischargeDiagnosisDescription                    ,
+           Tag.MedicalAlerts                                    ,
+           Tag.MedicalRecordLocator                             ,
+           Tag.NamesOfIntendedRecipientsOfResults               ,
+           Tag.PreMedication                                    ,
+           Tag.ResultsComments                                  ,
+           Tag.VisitComments                                    ,
+           Tag.PatientName                                      ,
+           Tag.PatientID                                        ,
+           Tag.PatientAddress                                   ,
+           Tag.PatientBirthDate                                 ,
+           Tag.PatientBirthName                                 ,
+           Tag.PatientBirthTime                                 ,
+           Tag.PatientInstitutionResidence                      ,
+           Tag.PatientInsurancePlanCodeSequence                 ,
+           Tag.PatientMotherBirthName                           ,
+           Tag.PatientReligiousPreference                       ,
+           Tag.PatientTelephoneNumbers                          ,
+           Tag.PatientComments                                  ,
+           Tag.PatientState                                     ,
+           Tag.PatientTransportArrangements                     ,
+           Tag.PatientPrimaryLanguageCodeSequence               ,
+           Tag.PatientPrimaryLanguageModifierCodeSequence       ,
+           Tag.PersonName                                       ,
+           Tag.PersonAddress                                    ,
+           Tag.PersonIdentificationCodeSequence                 ,
+           Tag.PersonTelephoneNumbers                           ,
+           Tag.OtherPatientIDsSequence                          ,
+           Tag.OtherPatientIDs                                  ,
+           Tag.OtherPatientNames                                ,
+           Tag.AdditionalPatientHistory                         ,
+           Tag.AuthorObserverSequence                           ,
+           Tag.ConfidentialityConstraintOnPatientDataDescription,
+           Tag.DistributionAddress                              ,
+           Tag.DistributionName                                 ,
+           Tag.IdentifyingComments                              ,
+           Tag.ImageComments                                    ,
+           Tag.Impressions                                      ,
+           Tag.InsurancePlanIdentification                      ,
+           Tag.InterpretationDiagnosisDescription               ,
+           Tag.InterpretationIDIssuer                           ,
+           Tag.InterpretationRecorder                           ,
+           Tag.InterpretationText                               ,
+           Tag.InterpretationTranscriber                        ,
+           Tag.IssuerOfAdmissionID                              ,
+           Tag.Occupation                                       ,
+           Tag.PatientInstitutionResidence                      ,
+           Tag.TextComments                                     ,
+           Tag.TextString                                       ,
+           Tag.VisitComments                                    ,
+           Tag.PatientSex                                       ,
+           Tag.PatientSize                                      ,
+           Tag.PatientAge                                       ,
+           Tag.MilitaryRank                                     ,
+           Tag.EthnicGroup                                      ,
+           Tag.PatientSexNeutered                               ,
+           Tag.LastMenstrualDate                                ,
+           Tag.PregnancyStatus                                  ,
+           Tag.SmokingStatus                                    ,
+           Tag.Allergies                                        ,
+           Tag.InstitutionAddress                               ,
+           Tag.InstitutionName                                  ,
+           Tag.InstitutionalDepartmentName                      ,
+           Tag.InstitutionCodeSequence                          ,
+           Tag.PerformedStationName                             ,
+           Tag.ResponsibleOrganization                          ,
+           Tag.ScheduledStationAETitle                          ,
+           Tag.ScheduledStationName                             ,
+           Tag.ScheduledStationGeographicLocationCodeSequence   ,
+           Tag.ScheduledStationNameCodeSequence                 ,
+           Tag.ScheduledStudyLocation                           ,
+           Tag.ScheduledStudyLocationAETitle                    ,
+           Tag.StationName                                      ,
+           Tag.VerifyingOrganization                            ,
+           Tag.PhysiciansOfRecord                               ,
+           Tag.PhysiciansOfRecordIdentificationSequence         ,
+           Tag.PerformingPhysicianName                          ,
+           Tag.PerformingPhysicianIdentificationSequence        ,
+           Tag.OperatorsName                                    ,
+           Tag.ReferringPhysicianName                           ,
+           Tag.ReferringPhysicianAddress                        ,
+           Tag.NameOfPhysiciansReadingStudy                     ,
+           Tag.RequestingPhysician                              ,
+           Tag.RequestingPhysicianIdentificationSequence        ,
+           Tag.ActualHumanPerformersSequence                    ,
+           Tag.HumanPerformerName                               ,
+           Tag.HumanPerformerOrganization                       ,
+           Tag.InterpretationApproverSequence                   ,
+           Tag.InterpretationAuthor                             ,
+           Tag.IntendedRecipientsOfResultsIdentificationSequence,
+           Tag.OrderCallbackPhoneNumber                         ,
+           Tag.OrderEnteredBy                                   ,
+           Tag.OrderEntererLocation                             ,
+           Tag.PhysicianApprovingInterpretation                 ,
+           Tag.PhysiciansReadingStudyIdentificationSequence     ,
+           Tag.PhysiciansOfRecord                               ,
+           Tag.PhysiciansOfRecordIdentificationSequence         ,
+           Tag.ReferringPhysicianAddress                        ,
+           Tag.ReferringPhysicianName                           ,
+           Tag.ReferringPhysicianIdentificationSequence         ,
+           Tag.ReferringPhysicianTelephoneNumbers               ,
+           Tag.RequestingService                                ,
+           Tag.ResponsiblePerson                                ,
+           Tag.ScheduledHumanPerformersSequence                 ,
+           Tag.ScheduledPerformingPhysicianIdentificationSequence,
+           Tag.ScheduledPerformingPhysicianName                 ,
+           Tag.Manufacturer                                     ,
+           Tag.ManufacturerModelName                            ,
+           Tag.SoftwareVersions                                 ,
+           Tag.OverlayComments                                  ,
+           Tag.OverlayData                                      ,
+           Tag.OverlayTime                                      ,
+           Tag.OverlayData                                      ,
+    };
+
+
+
     public static void searchingFoloder(File root, String ketWord){
         System.out.println("BBB : "+root.getAbsolutePath());
         File[] fileList = root.listFiles();
@@ -28,8 +160,6 @@ public class DicomHeaderExtraction {
         for(File tmpFile :fileList){
 
             if(tmpFile.isFile())
-                continue;
-            else if(tmpFile.getName().toUpperCase().equalsIgnoreCase(ketWord.toUpperCase()))
                 extrationDicomHeader(tmpFile);
             else
                 searchingFoloder(tmpFile, ketWord);
@@ -40,32 +170,28 @@ public class DicomHeaderExtraction {
 
     private static void extrationDicomHeader(File root) {
 
-        File dcm = null;
-        if(root.listFiles()==null)
-            return;
-        dcm = root.listFiles()[0];
 
-
-
-
-        DicomReader dicomReader = new DicomReader( dcm);
+        DicomReader dicomReader = new DicomReader( root);
         HashMap<String, String> tmpColumns = new HashMap<>();
 
 
         try {
             HashMap<Integer, String> att = dicomReader.getAttirbutesWithOutSQ();
-            for(int tag : header){
+            if(att==null)
+                return;;
+
+            for(int tag : AnmiTagList){
                 tmpColumns.put(headerNameMap.get(tag),att.get(tag));
             }
 
-            tmpColumns.put("DirName", dcm.getAbsolutePath().substring(0, dcm.getAbsolutePath().lastIndexOf("\\")));
+            tmpColumns.put("DirName",root.getAbsolutePath());
             columsValue.add(tmpColumns);
 //                           columsValue.add(FILEPATH);
 
 
         } catch (IOException e) {
 
-            System.out.println("BBB : "+dcm.getAbsolutePath());
+            System.out.println("BBB : "+root.getAbsolutePath());
             dicomReader.close();
             e.printStackTrace();
         }
@@ -78,6 +204,14 @@ public class DicomHeaderExtraction {
     }
 
     public static void main(String[] args) {
+        for(int tag : AnmiTagList){
+            String tagDes = Dictionary.getDescription(tag);
+            headerNameMap.put(tag, tagDes);
+            headerName.add(tagDes);
+        }
+        headerName.add("DirName");
+        searchingFoloder(new File("D:\\98_data\\21641655_20140715_DCM"),null);
+        ExportExcel.saveXlsx("D:\\98_data\\21641655_20140715_DCM\\DicomHeader.xlsx", headerName, columsValue);
       /*  for(int tag : header){
             String tagDes = Dictionary.getDescription(tag);
             headerNameMap.put(tag, tagDes);
@@ -89,8 +223,8 @@ public class DicomHeaderExtraction {
         ExportExcel.saveXlsx("D:\\98_data\\08_ysub\\DicomHeader.xlsx", headerName, columsValue);*/
 
 
-      for(String tmp : Dictionary.getTagList())
-          System.out.println(tmp);
+    /*  for(String tmp : Dictionary.getTagList())
+          System.out.println(tmp);*/
 
 
         // AC_DicomDictionary.setupList();;

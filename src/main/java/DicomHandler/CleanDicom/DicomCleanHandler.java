@@ -3,6 +3,7 @@ package DicomHandler.CleanDicom;
 import DicomHandler.DicomHandler;
 import DicomHandler.LogTag.LogTagAttribute;
 import DicomHandler.TagCategory.DicomReconTag;
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.data.VR;
@@ -27,6 +28,19 @@ public class DicomCleanHandler extends DicomHandler {
     public DicomCleanHandler() {
         //  processingTag.addAll(Arrays.stream(ANONYMIZATION_LIST).boxed().collect(Collectors.toList()));
 
+    }
+
+
+    public boolean buildAttrbutesTmpTEst(Map<Integer, String> arrTagNVaule, byte[] pixelData) {
+
+        for(int tmpTag : arrTagNVaule.keySet()){
+           // System.out.println(String.format("TAG : %08x, Created value : %s ",tmpTag, arrTagNVaule.get(tmpTag))  );
+            setAttribute(tmpTag, arrTagNVaule.get(tmpTag));
+        }
+        metaData.setValue(Tag.TransferSyntaxUID,VR.UI, UID.ExplicitVRLittleEndian);
+        attributes.setBytes(Tag.PixelData, VR.valueOf("OW"), pixelData);
+
+        return true;
     }
 
 
@@ -74,6 +88,13 @@ public class DicomCleanHandler extends DicomHandler {
 
 
         return true;
+    }
+
+    public boolean saveDicomFile(String outFilePath, Attributes metaData, Attributes attributes) throws IOException {
+
+        this.metaData = metaData;
+                this.attributes = attributes;
+        return  saveDicomFile(outFilePath);
     }
 
     public boolean saveDicomFile(String outFilePath) throws IOException {

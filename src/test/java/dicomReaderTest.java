@@ -13,8 +13,29 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class dicomReaderTest {
+
+    @Test
+    public  void renameFile(){
+        String rootPath = "D:\\98_data\\tmp";
+        File[] file = new File(rootPath).listFiles();
+        for(File tmpProject : file){
+            for(File tmpFile : tmpProject.listFiles()){
+                String[] fileName = tmpFile.getName().split("_");
+                for(File dcmfile : tmpFile.listFiles()) {
+                    String newName =tmpProject.getAbsoluteFile() + File.separator +
+                            fileName[1] + File.separator + fileName[2]+File.separator+dcmfile.getName();
+                    System.out.println(newName);
+
+                    dcmfile.renameTo(new File(newName));
+                }
+            }
+        }
+
+
+    }
 
     public void writeToFile(String filename, byte[] pData)
 
@@ -81,10 +102,120 @@ public class dicomReaderTest {
         return byteArray;
     }
 
-
-
+    String[] folderName = {"chest","hand","mammo","spine"};
 
     @Test
+    public void Tmp() {
+
+        String input = "D:\\98_data\\03_AiCRO_Dev\\PET-CT\\etc";
+        String outputTraining = "D:\\98_data\\03_AiCRO_Dev\\PET-CT\\etc\\output\\Testing2";
+        String outputTest = "D:\\98_data\\03_AiCRO_Dev\\PET-CT\\etc\\output\\validation";
+
+        int traningDataIdx = 0;
+        int TestDataIdx = 0;
+
+        for(String tmpName : folderName){
+            File tmpFileList = new File(input+File.separator+tmpName);
+
+                radomFileName(tmpFileList);
+        }
+
+        for(String tmpName : folderName){
+
+
+
+            File outputTraningFolderName = new File( outputTraining + File.separator + tmpName);
+            if (tmpName.equals("chest") || tmpName.equals("spine"))
+                outputTraningFolderName = new File( outputTraining + File.separator + "other");
+
+            File outputTestFolderName = new File( outputTest + File.separator + tmpName);
+            if (tmpName.equals("chest") || tmpName.equals("spine"))
+                outputTestFolderName = new File( outputTest + File.separator + "other");
+
+            if(!outputTraningFolderName.exists())
+                outputTraningFolderName.mkdirs();
+            if(!outputTestFolderName.exists())
+                outputTestFolderName.mkdirs();
+
+
+            File tmp = new File(input+File.separator+tmpName);
+            File[] tmpFileList = tmp.listFiles();
+            int cnt = 0;
+            for(File tmpDcm : tmpFileList) {
+                System.out.println((double)cnt/(double)tmpFileList.length);
+                if((double)cnt/(double)tmpFileList.length<0.8) {
+                    fileCopy(tmpDcm.getAbsolutePath(), outputTraningFolderName.getAbsolutePath() + File.separator + "Training_" + traningDataIdx + ".dcm");
+                    traningDataIdx++;
+                }else{
+                    fileCopy(tmpDcm.getAbsolutePath(), outputTestFolderName.getAbsolutePath() + File.separator + "Training_" + TestDataIdx + ".dcm");
+                    TestDataIdx++;
+                }
+
+                cnt++;
+
+
+            }
+
+        }
+
+
+
+
+
+
+    }
+
+
+    public static void fileCopy(String input, String output) {
+        //원본 파일경로
+        String oriFilePath = input;
+        //복사될 파일경로
+        String copyFilePath = output;
+
+        //파일객체생성
+        File oriFile = new File(oriFilePath);
+        //복사파일객체생성
+        File copyFile = new File(copyFilePath);
+
+        try {
+
+            FileInputStream fis = new FileInputStream(oriFile); //읽을파일
+            FileOutputStream fos = new FileOutputStream(copyFile); //복사할파일
+
+            int fileByte = 0;
+            // fis.read()가 -1 이면 파일을 다 읽은것
+            while((fileByte = fis.read()) != -1) {
+                fos.write(fileByte);
+            }
+            //자원사용종료
+            fis.close();
+            fos.close();
+
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void radomFileName(File tmp){
+        File[] tmpFileList = tmp.listFiles();
+        for(File tmpDcm : tmpFileList){
+            tmpDcm.renameTo(new File(tmp.getAbsolutePath()+File.separator+UUID.randomUUID().toString()));
+
+        }
+
+
+
+    }
+
+
+
+
+
+        @Test
     public void testReadDicom(){
 
         File tmpFile = new File("D:\\@Ing\\03_ctims\\녹십자랩셀\\sample_3.dcm");

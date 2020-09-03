@@ -2,10 +2,7 @@ package DicomHandler;
 
 import DicomHandler.Config.Dictionary;
 import DicomHandler.Util.ByteConverter;
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.ElementDictionary;
-import org.dcm4che3.data.StandardElementDictionary;
-import org.dcm4che3.data.VR;
+import org.dcm4che3.data.*;
 
 import java.nio.ByteBuffer;
 
@@ -31,12 +28,18 @@ public class DicomHandler {
 
     protected void setAttribute(int tag, String value) {
         VR vr = Dictionary.getVR(tag);
+        if(tag == Tag.SmallestImagePixelValue)
+            vr = VR.US;
+        if(tag == Tag.LargestImagePixelValue)
+            vr = VR.US;
+
         //   System.out.println("Test : aonoy  VR: "+vr.toString()+ " value : "+ value);
         setAttribute(tag, vr, value);
     }
 
     protected void setAttribute(int tag, VR vr, String value) {
-        //   System.out.println("Test : aonoy  VR: "+vr.toString()+ " value : "+ value);
+       //   System.out.println("Test : aonoy  VR: "+vr.toString()+ " value : "+ value);
+
         if (tag >= 0x00020000 && tag <= 0x0002EEEE) {
             metaData.setBytes(tag, vr, getByteValue(vr, value));
         } else {
@@ -46,6 +49,8 @@ public class DicomHandler {
 
 
     public static byte[] getByteValue(VR vr, String vaule) {
+
+
 
 
         byte[] abValue = new byte[0];
